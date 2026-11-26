@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal - Send, Spend &amp; Manage</title>
+    <style>
+        :root {
+            --pp-navy: #003087;
+            --pp-blue: #0070ba;
+            --pp-sky: #4db8ff;
+            --pp-dark: #0b0c0e;
+            --pp-text: #111111;
+            --pp-muted: #5f6368;
+            --pp-light-bg: #f5f7fa;
+            --pp-border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: var(--pp-text);
+            scroll-behavior: smooth;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--pp-border);
+        }
+
+        .header-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .brand-wordmark {
+            font-size: 24px;
+            font-weight: 800;
+            font-style: italic;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .brand-wordmark .dark {
+            color: var(--pp-navy);
+        }
+
+        .brand-wordmark .light {
+            color: var(--pp-blue);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-outline-sm {
+            padding: 8px 16px;
+            border-radius: 24px;
+            border: 1.5px solid var(--pp-navy);
+            color: var(--pp-navy);
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-sm:hover {
+            background-color: #eef4fb;
+        }
+
+        .btn-solid-sm {
+            padding: 9px 18px;
+            border-radius: 24px;
+            border: none;
+            background-color: var(--pp-navy);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-solid-sm:hover {
+            background-color: #002366;
+        }
+
+        .send-section {
+            background-color: var(--pp-navy);
+            color: #ffffff;
+            padding: 52px 20px;
+        }
+
+        .section-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+
+        .send-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 28px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .send-grid {
+                grid-template-columns: 1.15fr 0.85fr;
+                gap: 40px;
+            }
+        }
+
+        .send-section h1 {
+            font-size: clamp(34px, 6vw, 48px);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -0.6px;
+        }
+
+        .send-section p {
+            font-size: clamp(16px, 2.5vw, 19px);
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.92);
+            max-width: 520px;
+            margin-bottom: 24px;
+        }
+
+        .btn-send-money {
+            display: inline-block;
+            background-color: #3a5fa8;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 28px;
+            padding: 13px 26px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.15s ease;
+        }
+
+        .btn-send-money:hover {
+            background-color: #4b73c2;
+            transform: translateY(-1px);
+        }
+
+        .media-frame {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.08);
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .app-banner-section {
+            background-color: var(--pp-sky);
+            color: var(--pp-text);
+            padding: 56px 20px;
+            text-align: center;
+        }
+
+        .app-banner-section h2 {
+            font-size: clamp(36px, 7vw, 54px);
+            font-weight: 800;
+            line-height: 1.06;
+            letter-spacing: -1px;
+            max-width: 680px;
+            margin: 0 auto 18px auto;
+        }
+
+        .app-banner-section p {
+            font-size: clamp(15px, 2.4vw, 18px);
+            line-height: 1.5;
+            max-width: 620px;
+            margin: 0 auto 26px auto;
+            color: #111827;
+        }
+
+        .app-media-box {
+            max-width: 560px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.35);
+            min-height: 160px;
+        }
+
+        .app-media-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .wallet-section {
+            background-color: #ffffff;
+            padding: 56px 20px;
+        }
+
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 28px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .wallet-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+        }
+
+        .wallet-section h2 {
+            font-size: clamp(32px, 5.5vw, 44px);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.6px;
+            margin-bottom: 14px;
+            color: var(--pp-text);
+        }
+
+        .wallet-section p {
+            font-size: 16px;
+            line-height: 1.55;
+            color: var(--pp-muted);
+            margin-bottom: 24px;
+            max-width: 480px;
+        }
+
+        .btn-wallet-pill {
+            display: inline-block;
+            background-color: #eef1f6;
+            color: var(--pp-text);
+            border: none;
+            border-radius: 28px;
+            padding: 13px 24px;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-wallet-pill:hover {
+            background-color: #dfe5ee;
+        }
+
+        .wallet-media-card {
+            border-radius: 22px;
+            overflow: hidden;
+            background-color: var(--pp-light-bg);
+            min-height: 180px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .wallet-media-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .site-footer {
+            background-color: var(--pp-dark);
+            color: #ffffff;
+            padding: 44px 20px 36px 20px;
+        }
+
+        .footer-inner {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-style: italic;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+
+        .footer-nav-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 24px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .footer-nav-row a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .footer-nav-row a:hover {
+            text-decoration: underline;
+        }
+
+        .region-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .footer-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            margin: 20px 0;
+        }
+
+        .footer-meta-top {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 14px;
+        }
+
+        .footer-legal-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 22px;
+        }
+
+        .footer-legal-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .footer-legal-links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-notice {
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.78);
+            margin-top: 18px;
+            max-width: 780px;
+        }
+
+        .footer-disclaimer {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.72);
+            margin-top: 22px;
+        }
+
+        /* --- AUTH MODAL OVERLAY (MATCHING SCREENSHOT) --- */
+        .auth-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background-color: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .auth-modal-backdrop.active {
+            display: flex;
+        }
+
+        .auth-modal-sheet {
+            width: 100%;
+            max-width: 410px;
+            background-color: #f3f6fb;
+            border-radius: 26px;
+            padding: 28px 20px 26px 20px;
+            position: relative;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            margin: auto;
+        }
+
+        .auth-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            background: #e2e8f0;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-modal-logo {
+            font-size: 32px;
+            font-weight: 800;
+            font-style: italic;
+            letter-spacing: -0.6px;
+            color: #003087;
+            margin-bottom: 10px;
+        }
+
+        .auth-modal-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .auth-modal-subtitle {
+            font-size: 13.5px;
+            color: #5f6368;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            padding: 0 8px;
+        }
+
+        .auth-card-container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .pp-input-group {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .pp-input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .pp-input-group:focus-within {
+            border-color: #0070ba;
+            box-shadow: 0 0 0 3px rgba(0, 112, 186, 0.14);
+        }
+
+        .pp-input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #5f6368;
+            margin-bottom: 3px;
+        }
+
+        .pp-input-group input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #111111;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .pp-input-group input::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .auth-modal-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+            margin-bottom: 18px;
+        }
+
+        .auth-modal-links button {
+            background: none;
+            border: none;
+            color: #0070ba;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .auth-modal-links button:hover {
+            text-decoration: underline;
+        }
+
+        .auth-feedback-msg {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            min-height: 18px;
+            text-align: center;
+        }
+
+        .btn-pp-pill-submit {
+            width: 100%;
+            background-color: #005ea6;
+            color: #ffffff;
+            border: none;
+            border-radius: 30px;
+            padding: 15px 0;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-pp-pill-submit:hover {
+            background-color: #004982;
+        }
+
+        .auth-mode-switch {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #5f6368;
+        }
+
+        .auth-mode-switch button {
+            background: none;
+            border: none;
+            color: #0070ba;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="index.html" class="brand-wordmark">
+                <span class="dark">Pay</span><span class="light">Pal</span>
+            </a>
+            <div class="header-actions">
+                <button type="button" class="btn-outline-sm" id="navLoginBtn" onclick="openAuthModal('login')">Log In</button>
+                <button type="button" class="btn-solid-sm" id="navSignupBtn" onclick="openAuthModal('signup')">Sign In</button>
+            </div>
+        </div>
+    </header>
+
+    <section id="send" class="send-section">
+        <div class="section-inner send-grid">
+            <div>
+                <h1>Send</h1>
+                <p>Search by name, username, email, or phone to send quickly, easily, and securely.</p>
+                <button type="button" class="btn-send-money" id="heroActionBtn" onclick="openAuthModal('signup')">Send Money</button>
+            </div>
+
+            <div class="media-frame">
+                <img src="send.jpeg" alt="Send money with PayPal" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </section>
+
+    <section class="app-banner-section">
+        <div class="section-inner">
+            <h2>All in the PayPal app</h2>
+            <p>Easily and securely spend, send, and manage your transactions—all in one place. Download the app on your device or continue to your account.</p>
+
+            <div class="app-media-box">
+                <img src="Pay.jpeg" alt="PayPal mobile app preview" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </section>
+
+    <section id="wallet" class="wallet-section">
+        <div class="section-inner wallet-grid">
+            <div>
+                <h2>Load your digital wallet</h2>
+                <p>Debit cards. Credit cards. Bank accounts. Securely store all your preferred ways to pay and track your PayPal transactions.</p>
+                <button type="button" class="btn-wallet-pill" onclick="openAuthModal('signup')">Add Payment Methods</button>
+            </div>
+
+            <div class="wallet-media-card">
+                <img src="digital.jpeg" alt="Digital Wallet and PayPal checkout preview" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-logo">PayPal</div>
+
+            <div class="footer-nav-row">
+                <a href="#send">Help</a>
+                <a href="#send">Contact</a>
+                <a href="#wallet">Fees</a>
+                <a href="#wallet">Security</a>
+                <a href="#send">Features</a>
+                <a href="#wallet">Shop</a>
+            </div>
+
+            <div class="region-pill">
+                <span>🌐</span>
+                <span>United States</span>
+            </div>
+
+            <hr class="footer-divider">
+
+            <div class="footer-nav-row" style="margin-bottom: 12px;">
+                <a href="#send">About</a>
+                <a href="#send">Newsroom</a>
+                <a href="#send">Jobs</a>
+                <a href="#wallet">Developers</a>
+            </div>
+
+            <hr class="footer-divider">
+
+            <div class="footer-meta-top">
+                <span>©️ 1999–2026 All rights reserved.</span>
+            </div>
+
+            <div class="footer-legal-links">
+                <a href="#">Accessibility</a>
+                <a href="#">Cookies</a>
+                <a href="#">Privacy</a>
+                <a href="#">Legal</a>
+            </div>
+
+            <p class="footer-notice">
+                PayPal Pte. Ltd. is licensed by the Monetary Authority of Singapore as a Major Payment Institution under the Payment Services Act 2019.
+            </p>
+
+            <p class="footer-disclaimer">
+                All screen images are for illustrative purposes only.
+            </p>
+        </div>
+    </footer>
+
+    <!-- SIGN IN / SIGN UP MODAL (MATCHING SCREENSHOT DESIGN) -->
+    <div id="authModalBackdrop" class="auth-modal-backdrop" onclick="closeModalOnBackdrop(event)">
+        <div class="auth-modal-sheet">
+            <button type="button" class="auth-modal-close" onclick="closeAuthModal()">&times;</button>
+
+            <div class="auth-modal-logo">PayPal</div>
+            <h2 id="modalHeading" class="auth-modal-title">Sign In to PayPal</h2>
+            <p id="modalSubheading" class="auth-modal-subtitle">Enter your name, email, initial balance, and password</p>
+
+            <form id="indexAuthForm">
+                <div class="auth-card-container">
+                    <div class="pp-input-group" id="fullNameGroup">
+                        <label for="inputFullName">Full Name</label>
+                        <input type="text" id="inputFullName" placeholder="e.g. James Isaac">
+                    </div>
+
+                    <div class="pp-input-group">
+                        <label for="inputEmail">Email</label>
+                        <input type="email" id="inputEmail" placeholder="name@example.com" required>
+                    </div>
+
+                    <div class="pp-input-group" id="initialBalanceGroup">
+                        <label for="inputInitialBalance">Initial Balance ($)</label>
+                        <input type="number" id="inputInitialBalance" step="0.01" min="0" placeholder="0.00">
+                    </div>
+
+                    <div class="pp-input-group">
+                        <label for="inputPassword">Password</label>
+                        <input type="password" id="inputPassword" placeholder="Enter your password" required>
+                    </div>
+                </div>
+
+                <div id="modalFeedbackMsg" class="auth-feedback-msg"></div>
+
+                <div class="auth-modal-links">
+                    <button type="button" onclick="handleSavedAccountClick()">Saved account?</button>
+                    <button type="button" onclick="handleForgotPasswordClick()">Forgot password?</button>
+                </div>
+
+                <button type="submit" id="modalSubmitBtn" class="btn-pp-pill-submit">Sign In</button>
+            </form>
+
+            <div class="auth-mode-switch" id="authModeSwitchRow">
+                Already have an account? <button type="button" onclick="switchAuthMode('login')">Log In</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAuthMode = 'signup'; // 'signup' (with Initial Balance) or 'login'
+
+        function formatUSD(amount) {
+            const num = parseFloat(amount);
+            const safeNum = Number.isNaN(num) || num < 0 ? 0 : num;
+            return '$' + safeNum.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function openAuthModal(mode) {
+            const isLoggedIn = localStorage.getItem('user_is_logged_in') === 'true';
+            const savedEmail = (localStorage.getItem('user_email') || '').trim();
+            const savedPassword = localStorage.getItem('user_password') || '';
+
+            if (isLoggedIn && savedEmail && savedPassword && mode === 'dashboard') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            switchAuthMode(mode === 'login' ? 'login' : 'signup');
+            document.getElementById('authModalBackdrop').classList.add('active');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModalBackdrop').classList.remove('active');
+            document.getElementById('modalFeedbackMsg').textContent = '';
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target === document.getElementById('authModalBackdrop')) {
+                closeAuthModal();
+            }
+        }
+
+        function switchAuthMode(mode) {
+            currentAuthMode = mode;
+            const heading = document.getElementById('modalHeading');
+            const subheading = document.getElementById('modalSubheading');
+            const fullNameGroup = document.getElementById('fullNameGroup');
+            const balanceGroup = document.getElementById('initialBalanceGroup');
+            const submitBtn = document.getElementById('modalSubmitBtn');
+            const switchRow = document.getElementById('authModeSwitchRow');
+            const feedback = document.getElementById('modalFeedbackMsg');
+
+            feedback.textContent = '';
+
+            if (mode === 'signup') {
+                heading.textContent = 'Sign In to PayPal';
+                subheading.textContent = 'Enter your name, email, initial balance, and password';
+                fullNameGroup.style.display = 'block';
+                balanceGroup.style.display = 'block';
+                submitBtn.textContent = 'Sign In';
+                switchRow.innerHTML = 'Already have an account? <button type="button" onclick="switchAuthMode(\'login\')">Log In</button>';
+            } else {
+                heading.textContent = 'Log In to PayPal';
+                subheading.textContent = 'Enter your registered email and password to continue';
+                fullNameGroup.style.display = 'none';
+                balanceGroup.style.display = 'none';
+                submitBtn.textContent = 'Log In';
+                switchRow.innerHTML = 'Need a new setup? <button type="button" onclick="switchAuthMode(\'signup\')">Create / Set Balance</button>';
+
+                const savedEmail = localStorage.getItem('user_email') || '';
+                if (savedEmail && !document.getElementById('inputEmail').value) {
+                    document.getElementById('inputEmail').value = savedEmail;
+                }
+            }
+        }
+
+        function handleSavedAccountClick() {
+            const savedEmail = (localStorage.getItem('user_email') || '').trim();
+            const savedName = (localStorage.getItem('user_full_name') || '').trim();
+            const feedback = document.getElementById('modalFeedbackMsg');
+
+            if (savedEmail) {
+                document.getElementById('inputEmail').value = savedEmail;
+                if (savedName) {
+                    document.getElementById('inputFullName').value = savedName;
+                }
+                feedback.style.color = '#0070ba';
+                feedback.textContent = 'Loaded saved account: ' + savedEmail;
+            } else {
+                feedback.style.color = '#c62828';
+                feedback.textContent = 'No saved account found on this device yet.';
+            }
+        }
+
+        function handleForgotPasswordClick() {
+            const savedEmail = (localStorage.getItem('user_email') || '').trim();
+            const feedback = document.getElementById('modalFeedbackMsg');
+
+            if (!savedEmail) {
+                feedback.style.color = '#c62828';
+                feedback.textContent = 'No account found yet. Fill the form above to create one.';
+                return;
+            }
+
+            localStorage.removeItem('user_is_logged_in');
+            window.location.href = 'dashboard.html';
+        }
+
+        document.getElementById('indexAuthForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const feedback = document.getElementById('modalFeedbackMsg');
+            const emailVal = document.getElementById('inputEmail').value.trim();
+            const passwordVal = document.getElementById('inputPassword').value;
+
+            if (currentAuthMode === 'signup') {
+                const fullNameVal = document.getElementById('inputFullName').value.trim();
+                const rawBalance = parseFloat(document.getElementById('inputInitialBalance').value);
+                const validBalance = Number.isNaN(rawBalance) || rawBalance < 0 ? 0 : rawBalance;
+
+                if (!fullNameVal) {
+                    feedback.style.color = '#c62828';
+                    feedback.textContent = 'Please enter your full name.';
+                    return;
+                }
+
+                if (!emailVal || !passwordVal) {
+                    feedback.style.color = '#c62828';
+                    feedback.textContent = 'Please enter your email and password.';
+                    return;
+                }
+
+                // Save profile & put user's entered amount into Crypto (BTC) Balance
+                localStorage.setItem('user_full_name', fullNameVal);
+                localStorage.setItem('user_email', emailVal);
+                localStorage.setItem('user_password', passwordVal);
+                localStorage.setItem('user_crypto_balance_usd', validBalance.toFixed(2));
+                localStorage.setItem('user_account_balance', validBalance.toFixed(2));
+                localStorage.setItem('user_paypal_balance', '0.00');
+
+                const initialTx = validBalance > 0 ? [{
+                    title: 'BTC Balance Added',
+                    meta: 'Crypto (BTC) Balance • ' + fullNameVal,
+                    amount: '+' + formatUSD(validBalance),
+                    type: 'positive'
+                }] : [];
+                localStorage.setItem('user_transactions', JSON.stringify(initialTx));
+
+                localStorage.setItem('user_is_logged_in', 'true');
+                window.location.href = 'dashboard.html';
+            } else {
+                const savedEmail = (localStorage.getItem('user_email') || '').trim();
+                const savedPassword = localStorage.getItem('user_password') || '';
+
+                if (!savedEmail || !savedPassword) {
+                    feedback.style.color = '#c62828';
+                    feedback.textContent = 'No account found. Switch to Sign In to create one.';
+                    return;
+                }
+
+                if (emailVal.toLowerCase() !== savedEmail.toLowerCase() || passwordVal !== savedPassword) {
+                    feedback.style.color = '#c62828';
+                    feedback.textContent = 'Email or password does not match your saved account.';
+                    return;
+                }
+
+                localStorage.setItem('user_is_logged_in', 'true');
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedEmail = (localStorage.getItem('user_email') || '').trim();
+            const savedPassword = localStorage.getItem('user_password') || '';
+            const isLoggedIn = localStorage.getItem('user_is_logged_in') === 'true';
+            const hasExistingAccount = Boolean(savedEmail && savedPassword);
+
+            const navSignupBtn = document.getElementById('navSignupBtn');
+            const navLoginBtn = document.getElementById('navLoginBtn');
+            const heroActionBtn = document.getElementById('heroActionBtn');
+
+            if (hasExistingAccount && isLoggedIn) {
+                navSignupBtn.textContent = 'Dashboard';
+                navSignupBtn.onclick = function () { window.location.href = 'dashboard.html'; };
+                navLoginBtn.textContent = 'Log In';
+                navLoginBtn.onclick = function () { openAuthModal('login'); };
+                heroActionBtn.onclick = function () { window.location.href = 'dashboard.html'; };
+            } else if (hasExistingAccount) {
+                navSignupBtn.textContent = 'Sign In';
+                navSignupBtn.onclick = function () { openAuthModal('signup'); };
+                navLoginBtn.textContent = 'Log In';
+                navLoginBtn.onclick = function () { openAuthModal('login'); };
+            }
+
+            document.querySelectorAll('img').forEach(img => {
+                const srcAttr = (img.getAttribute('src') || '').trim();
+                if (!srcAttr) {
+                    img.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

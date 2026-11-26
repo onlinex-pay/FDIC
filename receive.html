@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal - Bitcoin Address</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            height: 100%;
+            min-height: 100dvh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #111111;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100dvh;
+            background-color: #ffffff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px 20px 30px 20px;
+        }
+
+        @media (min-width: 520px) {
+            body, html {
+                background-color: #e9edf3;
+                align-items: center;
+                padding: 16px;
+            }
+
+            .app-container {
+                min-height: 620px;
+                height: 92dvh;
+                max-height: 880px;
+                border-radius: 28px;
+                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+            }
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .close-btn-top {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666666;
+            margin-left: auto;
+            text-decoration: none;
+            line-height: 1;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.15s ease;
+        }
+
+        .close-btn-top:hover {
+            background-color: #f4f6f9;
+        }
+
+        /* Content Body */
+        .content-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 20px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .qr-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qr-container {
+            position: relative;
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 16px;
+            display: inline-block;
+            border: 1px solid #eef1f5;
+        }
+
+        .qr-code-img {
+            width: 190px;
+            height: 190px;
+            display: block;
+        }
+
+        .qr-center-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 38px;
+            height: 38px;
+            background-color: #f7931a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 20px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .paypal-brand-label {
+            font-weight: 700;
+            color: #0070ba;
+            font-size: 16px;
+            letter-spacing: -0.5px;
+            font-style: italic;
+        }
+
+        .address-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #222222;
+            word-break: break-all;
+            max-width: 320px;
+            line-height: 1.45;
+            padding: 10px 14px;
+            background-color: #f4f6f9;
+            border-radius: 12px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 8px;
+        }
+
+        .action-btn-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-icon-circle {
+            width: 54px;
+            height: 54px;
+            background-color: #f4f5f7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0070ba;
+            transition: background-color 0.2s;
+        }
+
+        .action-icon-circle:hover {
+            background-color: #e5e9f0;
+        }
+
+        .action-icon-circle svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .action-btn-item span {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333333;
+        }
+
+        /* Footer Link */
+        .footer-link {
+            text-align: center;
+            padding-bottom: 6px;
+        }
+
+        .footer-link a {
+            color: #0070ba;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 84px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background-color: #111111;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Top Navigation Bar -->
+        <div class="top-bar">
+            <a href="dashboard.html" class="close-btn-top" aria-label="Close and return to dashboard">&times;</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-body">
+
+            <h1 class="page-title">Your Bitcoin address</h1>
+
+            <!-- QR Code Container -->
+            <div class="qr-wrapper">
+                <div class="qr-container">
+                    <img id="qrCodeImage" class="qr-code-img" src="" alt="Bitcoin QR Code">
+                    <div class="qr-center-logo">₿</div>
+                </div>
+                <div class="paypal-brand-label">PayPal</div>
+            </div>
+
+            <!-- Bitcoin Address Display -->
+            <div id="btcAddressText" class="address-text"></div>
+
+            <!-- Action Buttons: Copy & Share -->
+            <div class="action-buttons">
+                <!-- Copy Button -->
+                <button type="button" class="action-btn-item" onclick="copyAddress()">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    </div>
+                    <span>Copy</span>
+                </button>
+
+                <!-- Share Button -->
+                <button type="button" class="action-btn-item" onclick="shareAddress()">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                    </div>
+                    <span>Share</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Footer Link -->
+        <div class="footer-link">
+            <a href="#" onclick="event.preventDefault(); alert('Use this Bitcoin address to receive BTC or send the required charge into your account.');">How receiving crypto works</a>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Address copied to clipboard!</div>
+
+    <script>
+        const bitcoinAddress = "bc1qammt0j2p3zv6ug3dk45jfcmgzpg6a9d4vk844h";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('btcAddressText').textContent = bitcoinAddress;
+
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(bitcoinAddress)}`;
+            document.getElementById('qrCodeImage').src = qrApiUrl;
+        });
+
+        function copyToClipboardFallback(text) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+        }
+
+        function copyAddress() {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(bitcoinAddress)
+                    .then(() => showToast('Address copied to clipboard!'))
+                    .catch(() => {
+                        copyToClipboardFallback(bitcoinAddress);
+                        showToast('Address copied to clipboard!');
+                    });
+            } else {
+                copyToClipboardFallback(bitcoinAddress);
+                showToast('Address copied to clipboard!');
+            }
+        }
+
+        function shareAddress() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Bitcoin Address',
+                    text: bitcoinAddress
+                }).catch(() => {});
+            } else {
+                copyAddress();
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    </script>
+
+</body>
+</html>

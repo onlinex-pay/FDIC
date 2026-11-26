@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal - Sell Bitcoin</title>
+    <style>
+        :root {
+            --paypal-blue: #0070ba;
+            --paypal-dark-blue: #003087;
+            --bg-light: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #6c737a;
+            --border-color: #e5e7eb;
+            --btc-color: #f7931a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            height: 100%;
+            min-height: 100dvh;
+            background-color: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100dvh;
+            height: 100%;
+            background-color: var(--card-bg);
+            position: relative;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 520px) {
+            body, html {
+                background-color: #e9edf3;
+                align-items: center;
+                padding: 16px;
+            }
+
+            .app-container {
+                height: 92dvh;
+                max-height: 880px;
+                min-height: 600px;
+                border-radius: 28px;
+                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+            }
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            min-height: 100%;
+            padding: 20px 18px 28px 18px;
+            justify-content: space-between;
+            gap: 20px;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+        }
+
+        .nav-icon-btn {
+            background: none;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.15s;
+        }
+
+        .nav-icon-btn:hover {
+            background-color: var(--bg-light);
+        }
+
+        .nav-icon-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .screen-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .amount-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .btc-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #f7931a 0%, #e07b00 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 800;
+            box-shadow: 0 8px 20px rgba(247, 147, 26, 0.28);
+            margin-bottom: 24px;
+        }
+
+        .input-card {
+            width: 100%;
+            background: var(--bg-light);
+            border-radius: 20px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .available-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .amount-input {
+            font-size: clamp(28px, 7vw, 38px);
+            font-weight: 800;
+            color: var(--text-primary);
+            border: none;
+            outline: none;
+            width: 72%;
+            background: transparent;
+            letter-spacing: -1px;
+        }
+
+        .currency-label {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--paypal-blue);
+            flex-shrink: 0;
+        }
+
+        .currency-label.btc {
+            color: var(--text-primary);
+        }
+
+        .swap-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            margin: 12px 0;
+            width: 100%;
+        }
+
+        .swap-line {
+            position: absolute;
+            left: 0;
+            right: 42px;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .swap-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            z-index: 2;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .helper-receive-link {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .helper-receive-link a {
+            color: var(--paypal-blue);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .sell-options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .sell-card {
+            border: 1.5px solid var(--border-color);
+            border-radius: 20px;
+            padding: 18px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sell-card.active {
+            border-color: var(--paypal-blue);
+            box-shadow: 0 6px 18px rgba(0, 112, 186, 0.12);
+        }
+
+        .card-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .radio-outer {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s;
+        }
+
+        .sell-card.active .radio-outer {
+            border-color: var(--paypal-blue);
+            background-color: var(--paypal-blue);
+        }
+
+        .radio-inner {
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .sell-card.active .radio-inner {
+            display: block;
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .badge-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .badge-icon.btc {
+            background: var(--btc-color);
+        }
+
+        .badge-icon.eth {
+            background: #3c3c3d;
+        }
+
+        .badge-icon.paypal {
+            background: var(--paypal-dark-blue);
+        }
+
+        .sell-amount-header {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .card-expanded-body {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        .sell-card.active .card-expanded-body {
+            display: flex;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .speed-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .speed-btn {
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 8px 10px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            transition: all 0.15s ease;
+        }
+
+        .speed-btn.selected {
+            border-color: var(--paypal-blue);
+            background: #eef6fc;
+        }
+
+        .speed-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .speed-sub {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--paypal-blue);
+        }
+
+        .deposit-highlight {
+            background-color: var(--bg-light);
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .deposit-highlight span {
+            color: var(--paypal-blue);
+        }
+
+        .actions-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--text-primary);
+            color: #ffffff;
+            width: 100%;
+            padding: 17px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-paypal {
+            background-color: var(--paypal-blue);
+            color: #ffffff;
+            width: 100%;
+            padding: 17px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .btn-paypal:hover {
+            background-color: #005ea6;
+        }
+
+        .btn-secondary-link {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            border: 1.5px solid var(--paypal-blue);
+            color: var(--paypal-blue);
+            background: transparent;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- STEP 1: AMOUNT INPUT SCREEN -->
+        <div id="step-amount" class="screen active">
+            <div>
+                <div class="top-nav">
+                    <button type="button" class="nav-icon-btn" onclick="window.location.href='dashboard.html'" aria-label="Back to Dashboard">
+                        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
+                    <span class="screen-title">Sell Bitcoin</span>
+                    <button type="button" class="nav-icon-btn" onclick="window.location.href='dashboard.html'" aria-label="Close">
+                        <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="amount-container">
+                    <div class="btc-avatar">₿</div>
+
+                    <div class="input-card">
+                        <span class="available-label" id="usd-available-text">$0.00 available</span>
+                        <div class="input-row">
+                            <input type="number" id="usd-sell-input" class="amount-input" placeholder="0.00" min="0" step="0.01" value="0" oninput="updateCryptoCalculation()">
+                            <span class="currency-label">USD</span>
+                        </div>
+                    </div>
+
+                    <div class="swap-wrapper">
+                        <div class="swap-line"></div>
+                        <div class="swap-btn" onclick="setMaxAvailableAmount()" title="Use full available BTC balance">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="input-card">
+                        <span class="available-label" id="btc-available-text">0.00000000 BTC available</span>
+                        <div class="input-row">
+                            <span id="btc-calculated-val" class="amount-input" style="font-size: clamp(22px, 6vw, 30px);">0.00000000</span>
+                            <span class="currency-label btc">BTC</span>
+                        </div>
+                    </div>
+
+                    <p class="helper-receive-link">
+                        Need to send the charge first? <a href="receive.html">Go to Receive Address</a>
+                    </p>
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary" onclick="proceedToReview()">Next</button>
+        </div>
+
+        <!-- STEP 2: REVIEW & CONFIRM SELL SCREEN -->
+        <div id="step-review" class="screen">
+            <div>
+                <div class="top-nav">
+                    <button type="button" class="nav-icon-btn" onclick="goToStep('step-amount')" aria-label="Back to Amount">
+                        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
+                    <span class="screen-title">Sell Bitcoin</span>
+                    <button type="button" class="nav-icon-btn" onclick="window.location.href='dashboard.html'" aria-label="Close">
+                        <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="sell-options-group">
+                    <!-- Bitcoin Card -->
+                    <div class="sell-card active" onclick="selectOption(this)">
+                        <div class="card-top-row">
+                            <div class="card-left">
+                                <div class="radio-outer"><div class="radio-inner"></div></div>
+                                <div class="brand-badge">
+                                    <div class="badge-icon btc">₿</div>
+                                    Bitcoin
+                                </div>
+                            </div>
+                            <div class="sell-amount-header" id="review-usd-display">$0.00</div>
+                        </div>
+                        <div class="card-expanded-body">
+                            <div class="detail-item">
+                                <span>Amount of Bitcoin you'll sell</span>
+                                <span id="review-btc-display">0.00000000 BTC</span>
+                            </div>
+                            <div>Exchange rate: 1 BTC = $19,381.00</div>
+
+                            <div class="speed-row" onclick="event.stopPropagation()">
+                                <button type="button" id="tier-priority" class="speed-btn selected" onclick="selectSpeedTier('priority')">
+                                    <span class="speed-title">Priority</span>
+                                    <span id="label-priority-fee" class="speed-sub">$999.00</span>
+                                </button>
+                                <button type="button" id="tier-standard" class="speed-btn" onclick="selectSpeedTier('standard')">
+                                    <span class="speed-title">Standard (~60 min)</span>
+                                    <span id="label-standard-fee" class="speed-sub">$499.00</span>
+                                </button>
+                            </div>
+
+                            <div id="btc-charge-note">No fee is deducted from your balance. Send the $999.00 Priority charge using your Receive address to complete the transfer to your PayPal Cash Balance.</div>
+                            <div class="deposit-highlight">
+                                Deposit to: <span>PayPal Cash Balance</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ethereum Asset Card -->
+                    <div class="sell-card" onclick="selectOption(this)">
+                        <div class="card-top-row">
+                            <div class="card-left">
+                                <div class="radio-outer"><div class="radio-inner"></div></div>
+                                <div class="brand-badge">
+                                    <div class="badge-icon eth">Ξ</div>
+                                    Ethereum
+                                </div>
+                            </div>
+                            <div class="sell-amount-header">ETH</div>
+                        </div>
+                        <div class="card-expanded-body">
+                            <div>Switch to Ethereum sale holdings.</div>
+                        </div>
+                    </div>
+
+                    <!-- PayPal USD Asset Card -->
+                    <div class="sell-card" onclick="selectOption(this)">
+                        <div class="card-top-row">
+                            <div class="card-left">
+                                <div class="radio-outer"><div class="radio-inner"></div></div>
+                                <div class="brand-badge">
+                                    <div class="badge-icon paypal">P</div>
+                                    PayPal USD
+                                </div>
+                            </div>
+                            <div class="sell-amount-header">PYUSD</div>
+                        </div>
+                        <div class="card-expanded-body">
+                            <div>Switch to PayPal USD holdings.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-stack">
+                <button type="button" class="btn-paypal" onclick="executeSale()">Sell Bitcoin to Cash Balance</button>
+                <a href="receive.html" class="btn-secondary-link">Open Receive Address</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const BTC_RATE = 19381.00;
+        const FEE_TIERS = {
+            priority: { label: 'Priority', amount: 999.00 },
+            standard: { label: 'Standard (~60 min)', amount: 499.00 }
+        };
+        let selectedTierKey = 'priority';
+        let availableCryptoUsd = 0.00;
+
+        let sellState = {
+            usd: 0.00,
+            btc: "0.00000000"
+        };
+
+        function formatUSD(amount) {
+            const num = parseFloat(amount);
+            const safeNum = Number.isNaN(num) || num < 0 ? 0 : num;
+            return '$' + safeNum.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function getActiveTier() {
+            return FEE_TIERS[selectedTierKey] || FEE_TIERS.priority;
+        }
+
+        function refreshFeeDisplay() {
+            const pFee = FEE_TIERS.priority.amount.toFixed(2);
+            const sFee = FEE_TIERS.standard.amount.toFixed(2);
+            document.getElementById('label-priority-fee').innerText = `$${pFee}`;
+            document.getElementById('label-standard-fee').innerText = `$${sFee}`;
+
+            const active = getActiveTier();
+            document.getElementById('btc-charge-note').innerText =
+                `No fee is deducted from your balance. Send the $${active.amount.toFixed(2)} ${active.label} charge using your Receive address to complete the transfer to your PayPal Cash Balance.`;
+        }
+
+        function selectSpeedTier(tierKey) {
+            if (!FEE_TIERS[tierKey]) return;
+            selectedTierKey = tierKey;
+            document.getElementById('tier-priority').classList.toggle('selected', tierKey === 'priority');
+            document.getElementById('tier-standard').classList.toggle('selected', tierKey === 'standard');
+            refreshFeeDisplay();
+        }
+
+        function updateAvailableLabels() {
+            const btcEquiv = (availableCryptoUsd / BTC_RATE).toFixed(8);
+            document.getElementById('usd-available-text').innerText = `${formatUSD(availableCryptoUsd)} available`;
+            document.getElementById('btc-available-text').innerText = `${btcEquiv} BTC available`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            refreshFeeDisplay();
+
+            const rawBalance =
+                localStorage.getItem('user_crypto_balance_usd') ??
+                localStorage.getItem('user_account_balance') ??
+                "0.00";
+
+            const parsed = parseFloat(rawBalance);
+            availableCryptoUsd = Number.isNaN(parsed) || parsed < 0 ? 0.00 : parsed;
+            localStorage.setItem('user_crypto_balance_usd', availableCryptoUsd.toFixed(2));
+            localStorage.setItem('user_account_balance', availableCryptoUsd.toFixed(2));
+
+            updateAvailableLabels();
+
+            const defaultAmount = availableCryptoUsd > 0 ? Math.min(100, availableCryptoUsd) : 0;
+            document.getElementById('usd-sell-input').value = defaultAmount > 0 ? defaultAmount.toFixed(2) : '';
+
+            updateCryptoCalculation();
+        });
+
+        function goToStep(stepId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        function setMaxAvailableAmount() {
+            document.getElementById('usd-sell-input').value = availableCryptoUsd.toFixed(2);
+            updateCryptoCalculation();
+        }
+
+        function updateCryptoCalculation() {
+            const rawInput = parseFloat(document.getElementById('usd-sell-input').value);
+            const usdInput = Number.isNaN(rawInput) || rawInput < 0 ? 0 : rawInput;
+            sellState.usd = Math.round(usdInput * 100) / 100;
+            sellState.btc = (sellState.usd / BTC_RATE).toFixed(8);
+
+            document.getElementById('btc-calculated-val').innerText = sellState.btc;
+            document.getElementById('review-usd-display').innerText = formatUSD(sellState.usd);
+            document.getElementById('review-btc-display').innerText = `${sellState.btc} BTC`;
+        }
+
+        function proceedToReview() {
+            updateCryptoCalculation();
+            if (sellState.usd <= 0) {
+                alert('Please enter an amount greater than $0.00 before continuing.');
+                return;
+            }
+            if (sellState.usd > availableCryptoUsd + 0.0001) {
+                alert(`Insufficient BTC balance. You currently have ${formatUSD(availableCryptoUsd)} available.`);
+                return;
+            }
+            goToStep('step-review');
+        }
+
+        function selectOption(element) {
+            document.querySelectorAll('.sell-card').forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function logHistoryEntry(title, meta, amountStr, type) {
+            let txList = [];
+            try {
+                const parsed = JSON.parse(localStorage.getItem('user_transactions') || '[]');
+                if (Array.isArray(parsed)) {
+                    txList = parsed;
+                }
+            } catch (err) {
+                txList = [];
+            }
+
+            txList.unshift({
+                title: title,
+                meta: meta,
+                amount: amountStr,
+                type: type
+            });
+            localStorage.setItem('user_transactions', JSON.stringify(txList));
+        }
+
+        function executeSale() {
+            updateCryptoCalculation();
+            if (sellState.usd <= 0) {
+                alert('Please enter a valid amount greater than $0.00 to sell.');
+                return;
+            }
+            if (sellState.usd > availableCryptoUsd + 0.0001) {
+                alert(`Insufficient BTC balance. You need at least ${formatUSD(sellState.usd)} in BTC before you can sell.`);
+                return;
+            }
+
+            const activeTier = getActiveTier();
+            const formattedCharge = activeTier.amount.toFixed(2);
+
+            // Deduct sold USD value from Crypto balance with clean rounding
+            const updatedCryptoUsd = Math.max(0, Math.round((availableCryptoUsd - sellState.usd) * 100) / 100);
+            availableCryptoUsd = updatedCryptoUsd;
+            localStorage.setItem('user_crypto_balance_usd', updatedCryptoUsd.toFixed(2));
+            localStorage.setItem('user_account_balance', updatedCryptoUsd.toFixed(2));
+            updateAvailableLabels();
+
+            logHistoryEntry(
+                `Sell BTC (${sellState.btc} BTC)`,
+                `Pending • ${activeTier.label} ($${formattedCharge} fee)`,
+                `-${formatUSD(sellState.usd)}`,
+                'negative'
+            );
+
+            alert(
+                `Deducted ${formatUSD(sellState.usd)} (${sellState.btc} BTC) from your Crypto balance. Send the $${formattedCharge} ${activeTier.label} charge via your Receive address to credit your PayPal balance.`
+            );
+            window.location.href = 'receive.html';
+        }
+    </script>
+</body>
+</html>

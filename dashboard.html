@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            min-height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #111111;
+        }
+
+        /* Mobile Container Wrapper */
+        .app-container {
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #f4f6f9;
+            position: relative;
+            padding-bottom: 96px;
+            overflow-y: auto;
+        }
+
+        /* --- SIGN IN VIEW (WHEN SIGNED OUT) --- */
+        .auth-screen {
+            display: none;
+            min-height: 100vh;
+            background-color: #ffffff;
+            padding: 40px 24px;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .auth-screen.active {
+            display: flex;
+        }
+
+        .auth-brand {
+            text-align: center;
+            margin-top: 28px;
+            margin-bottom: 36px;
+        }
+
+        .auth-brand-wordmark {
+            font-size: 32px;
+            font-weight: 800;
+            font-style: italic;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-brand-wordmark .pp-dark {
+            color: #003087;
+        }
+
+        .auth-brand-wordmark .pp-light {
+            color: #0079c1;
+        }
+
+        .auth-field-box {
+            border: 1.5px solid #9aa0a6;
+            border-radius: 6px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .auth-field-box:focus-within {
+            border-color: #0070ba;
+            box-shadow: 0 0 0 2px rgba(0, 112, 186, 0.15);
+        }
+
+        .auth-field-box label {
+            display: block;
+            font-size: 12px;
+            color: #5f6368;
+            margin-bottom: 4px;
+        }
+
+        .auth-field-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #111111;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .auth-error {
+            color: #c62828;
+            font-size: 13px;
+            margin-bottom: 14px;
+            min-height: 18px;
+        }
+
+        .auth-links-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .auth-link {
+            display: inline-block;
+            color: #0070ba;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .reset-panel {
+            display: none;
+            margin-top: 20px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background-color: #f8fafc;
+        }
+
+        .reset-panel.active {
+            display: block;
+        }
+
+        .reset-panel h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #111111;
+        }
+
+        .reset-panel p {
+            font-size: 12px;
+            color: #5f6368;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .btn-reset-secondary {
+            width: 100%;
+            background-color: #003087;
+            color: #ffffff;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-paypal-login {
+            width: 100%;
+            background-color: #005ea6;
+            color: #ffffff;
+            border: none;
+            border-radius: 28px;
+            padding: 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-paypal-login:hover {
+            background-color: #004982;
+        }
+
+        /* --- AUTHENTICATED DASHBOARD WRAPPER --- */
+        .dashboard-view {
+            display: none;
+        }
+
+        .dashboard-view.active {
+            display: block;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .content-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Top Account Strip */
+        .top-account-bar {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .account-identity {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+
+        .account-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0070ba;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .account-email-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111111;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .signout-chip-btn {
+            background-color: #f0f4f8;
+            color: #003087;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .signout-chip-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Setup Account Card */
+        .setup-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .progress-circle {
+            width: 48px;
+            height: 48px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #111;
+            flex-shrink: 0;
+        }
+
+        .setup-text h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .setup-text p {
+            font-size: 13px;
+            color: #6c737a;
+        }
+
+        /* Main Scrollable Carousel Row */
+        .cards-row {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+
+        .cards-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Main PayPal Card (1st) & Crypto Card (2nd) */
+        .balance-card, .crypto-card {
+            min-width: 88%;
+            background-color: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .crypto-card-top {
+            padding: 20px 20px 10px 20px;
+        }
+
+        .card-header-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0070ba;
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .card-header-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .crypto-value {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .crypto-subtext {
+            font-size: 13px;
+            color: #6c737a;
+        }
+
+        /* Blue Internal Banner inside Card */
+        .crypto-banner {
+            background-color: #0070ba;
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .crypto-banner.paypal-banner {
+            background-color: #003087;
+        }
+
+        .banner-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .banner-icon-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .banner-icon-box svg {
+            width: 20px;
+            height: 20px;
+            fill: #ffffff;
+        }
+
+        .banner-text h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .banner-text p {
+            font-size: 11px;
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+
+        .banner-arrow {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Recent Activity Card */
+        .activity-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+        }
+
+        .activity-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .activity-label {
+            font-size: 13px;
+            color: #6c737a;
+        }
+
+        .activity-number {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .btc-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #f7931a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* Featured Offers Section */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .see-all {
+            font-size: 14px;
+            color: #0070ba;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Offer Card */
+        .offer-card {
+            background: linear-gradient(135deg, #003087 0%, #0070ba 100%);
+            border-radius: 20px;
+            padding: 24px 20px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 112, 186, 0.2);
+        }
+
+        .walmart-badge {
+            background: #ffffff;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-weight: 900;
+            color: #0071ce;
+            font-size: 14px;
+        }
+
+        .offer-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .offer-card p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Secondary Panels (Accounts & Activity) */
+        .info-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .info-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 14px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #6c737a;
+        }
+
+        .detail-val {
+            font-weight: 600;
+            color: #111111;
+            text-align: right;
+        }
+
+        .tx-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .tx-item:last-child {
+            border-bottom: none;
+        }
+
+        .tx-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .tx-meta {
+            font-size: 12px;
+            color: #6c737a;
+        }
+
+        .tx-amount {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .tx-amount.positive {
+            color: #0a7d38;
+        }
+
+        .tx-amount.negative {
+            color: #0070ba;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0 20px 0;
+            z-index: 1000;
+        }
+
+        .bottom-nav.active {
+            display: flex;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #6c737a;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .nav-item.active {
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        /* Center Crypto Action Button in Nav */
+        .nav-send-btn {
+            background-color: #0070ba;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 112, 186, 0.4);
+            margin-top: -12px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .nav-send-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: #ffffff;
+        }
+
+        /* --- TRANSFER MODAL BOTTOM SHEET OVERLAY --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .transfer-modal-sheet {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 430px;
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px 36px 20px;
+            box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .transfer-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .transfer-modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 auto;
+            color: #111111;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            right: 0;
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #666666;
+            cursor: pointer;
+        }
+
+        .transfer-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .transfer-option-card {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-radius: 16px;
+            border: 2px solid #eaeaea;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .transfer-option-card.send-card {
+            border-color: #0070ba;
+        }
+
+        .transfer-option-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #f7f5f0;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+            color: #0070ba;
+        }
+
+        .transfer-option-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .transfer-option-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111111;
+            margin-bottom: 3px;
+        }
+
+        .transfer-option-info p {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.35;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- SIGN IN SCREEN ONLY -->
+        <div id="authScreen" class="auth-screen">
+            <div>
+                <div class="auth-brand">
+                    <div class="auth-brand-wordmark">
+                        <span class="pp-dark">Pay</span><span class="pp-light">Pal</span>
+                    </div>
+                </div>
+
+                <form id="loginForm">
+                    <div class="auth-field-box">
+                        <label for="loginEmail">Email or mobile number</label>
+                        <input type="text" id="loginEmail" placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="auth-field-box">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+
+                    <div id="authErrorMsg" class="auth-error"></div>
+
+                    <div class="auth-links-row">
+                        <a class="auth-link" onclick="showSavedAccountHint()">Need account reminder?</a>
+                        <a class="auth-link" onclick="toggleResetPanel()">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-paypal-login">Log In</button>
+                </form>
+
+                <div style="text-align: center; margin-top: 16px;">
+                    <a href="index.html" class="auth-link">Back to Home / Create Account</a>
+                </div>
+
+                <!-- Local Password Reset Box -->
+                <div id="resetPasswordPanel" class="reset-panel">
+                    <h4>Reset Password</h4>
+                    <p>Confirm your registered email address to set a new password for this browser profile.</p>
+                    <div class="auth-field-box" style="margin-bottom: 10px;">
+                        <label for="resetVerifyEmail">Registered email</label>
+                        <input type="email" id="resetVerifyEmail" placeholder="name@example.com">
+                    </div>
+                    <div class="auth-field-box" style="margin-bottom: 10px;">
+                        <label for="resetNewPassword">New password</label>
+                        <input type="password" id="resetNewPassword" placeholder="Create new password">
+                    </div>
+                    <button type="button" class="btn-reset-secondary" onclick="handlePasswordReset()">Save New Password</button>
+                </div>
+            </div>
+
+            <div style="text-align: center; font-size: 12px; color: #6c737a;">
+                Sign in with your registered email and password.
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD VIEW -->
+        <div id="dashboardView" class="dashboard-view">
+            <div class="content-body">
+
+                <!-- Top PayPal Account & Sign Out Bar -->
+                <div class="top-account-bar">
+                    <div class="account-identity">
+                        <span class="account-badge">PayPal Account</span>
+                        <span id="displayAccountEmail" class="account-email-text">user@example.com</span>
+                    </div>
+                    <button type="button" class="signout-chip-btn" onclick="logout()">Sign Out</button>
+                </div>
+
+                <!-- HOME TAB PANEL -->
+                <div id="panel-home" class="tab-panel active">
+
+                    <!-- Setup Account Card -->
+                    <div class="setup-card">
+                        <div class="progress-circle">1/2</div>
+                        <div class="setup-text">
+                            <h3>Set up your account</h3>
+                            <p id="setupSubtitle">Main PayPal balance &amp; BTC ready.</p>
+                        </div>
+                    </div>
+
+                    <!-- Horizontal Cards Row: 1st = Main PayPal Balance, 2nd = Crypto (BTC) -->
+                    <div class="cards-row">
+                        <!-- 1st Card: Main PayPal Balance -->
+                        <div class="balance-card">
+                            <div class="crypto-card-top">
+                                <div class="card-header-icon">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19.336 5.372c-.938-.938-2.618-1.572-5.118-1.572H7.28c-.446 0-.83.33-.893.773L3.804 20.353a.563.563 0 0 0 .556.647h3.766l.812-5.143.08-.435c.063-.442.447-.773.893-.773h1.83c3.558 0 6.34-1.442 7.156-5.836.31-1.657-.02-2.956-1.061-3.994z"/>
+                                    </svg>
+                                    PayPal Balance
+                                </div>
+                                <div id="paypalBalanceDisplay" class="crypto-value">$0.00</div>
+                                <div id="paypalOwnerSubtext" class="crypto-subtext">Main PayPal account</div>
+                            </div>
+
+                            <div class="crypto-banner paypal-banner" onclick="switchTab('accounts')">
+                                <div class="banner-left">
+                                    <div class="banner-icon-box">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="banner-text">
+                                        <h4>PayPal Info</h4>
+                                        <p>View your PayPal account details &amp; balance</p>
+                                    </div>
+                                </div>
+                                <div class="banner-arrow">&gt;</div>
+                            </div>
+                        </div>
+
+                        <!-- 2nd Card: Crypto / BTC Hub -->
+                        <div class="crypto-card">
+                            <div class="crypto-card-top">
+                                <div class="card-header-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"></path>
+                                        <line x1="10" y1="9" x2="14" y2="9"></line>
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    </svg>
+                                    Crypto
+                                </div>
+                                <div id="cryptoBalanceDisplay" class="crypto-value">$0.00</div>
+                                <div class="crypto-subtext">Available BTC value</div>
+                            </div>
+
+                            <div class="crypto-banner" onclick="saveBalanceAndOpenModal()">
+                                <div class="banner-left">
+                                    <div class="banner-icon-box">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14h-2v-2h2zm0-4h-2V7h2z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="banner-text">
+                                        <h4>Sell or Receive BTC</h4>
+                                        <p>Move funds from crypto to main PayPal or receive BTC</p>
+                                    </div>
+                                </div>
+                                <div class="banner-arrow">&gt;</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Card -->
+                    <div class="activity-card" onclick="switchTab('activity')">
+                        <div class="activity-left">
+                            <span class="activity-label">Recent activity</span>
+                            <span id="activityCountDisplay" class="activity-number">0</span>
+                        </div>
+                        <div class="btc-icon">₿</div>
+                    </div>
+
+                    <!-- Featured Offers Section -->
+                    <div class="section-header">
+                        <span class="section-title">Featured offers</span>
+                        <span class="see-all" onclick="switchTab('offers')">See all &gt;</span>
+                    </div>
+
+                    <!-- Offer Card (Walmart+) -->
+                    <div class="offer-card">
+                        <div class="walmart-badge">W+</div>
+                        <h3>Walmart+</h3>
+                        <p>40% back for 6 months...</p>
+                    </div>
+
+                </div>
+
+                <!-- ACCOUNTS TAB PANEL -->
+                <div id="panel-accounts" class="tab-panel">
+                    <div class="info-card">
+                        <h3>PayPal Account Info</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Full Name</span>
+                            <span id="accDetailFullName" class="detail-val">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Email</span>
+                            <span id="accDetailEmail" class="detail-val">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Phone Number</span>
+                            <span id="accDetailPhone" class="detail-val">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Main PayPal Balance</span>
+                            <span id="accDetailPaypalBal" class="detail-val">$0.00</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Crypto (BTC) Balance</span>
+                            <span id="accDetailCryptoBal" class="detail-val">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Session</h3>
+                        <p style="font-size: 13px; color: #6c737a; margin-bottom: 14px; line-height: 1.4;">
+                            Sign out to return to the login screen.
+                        </p>
+                        <button type="button" class="btn-paypal-login" onclick="logout()">Sign Out</button>
+                    </div>
+                </div>
+
+                <!-- ACTIVITY TAB PANEL -->
+                <div id="panel-activity" class="tab-panel">
+                    <div class="info-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="margin-bottom: 0;">Transaction History</h3>
+                            <button type="button" class="signout-chip-btn" onclick="saveBalanceAndOpenModal()">Crypto Actions</button>
+                        </div>
+                        <div id="transactionHistoryList"></div>
+                    </div>
+                </div>
+
+                <!-- OFFERS TAB PANEL -->
+                <div id="panel-offers" class="tab-panel">
+                    <div class="offer-card">
+                        <div class="walmart-badge">W+</div>
+                        <h3>Walmart+</h3>
+                        <p>40% back for 6 months...</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Fixed Bottom Navigation Bar -->
+        <nav id="bottomNav" class="bottom-nav">
+            <button type="button" id="nav-home" class="nav-item active" onclick="switchTab('home')">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                Home
+            </button>
+            <button type="button" id="nav-accounts" class="nav-item" onclick="switchTab('accounts')">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                Accounts
+            </button>
+            <!-- Center Crypto Action Button (Opens Sell / Receive modal) -->
+            <button type="button" class="nav-send-btn" onclick="saveBalanceAndOpenModal()">
+                <svg viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg>
+            </button>
+            <button type="button" id="nav-activity" class="nav-item" onclick="switchTab('activity')">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                Activity
+            </button>
+            <button type="button" id="nav-offers" class="nav-item" onclick="switchTab('offers')">
+                <svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 12 8.76 15.38 12 17 10.83 14.92 8H20v6z"/></svg>
+                Offers
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- TRANSFER MODAL BOTTOM SHEET POPUP (Crypto Sell / Receive) -->
+    <div id="transferModalOverlay" class="modal-overlay" onclick="closeTransferModalOnOutside(event)">
+        <div class="transfer-modal-sheet">
+            <div class="transfer-modal-header">
+                <h3>Crypto</h3>
+                <button type="button" class="modal-close-btn" onclick="closeTransferModal()">&times;</button>
+            </div>
+
+            <div class="transfer-options-list">
+                <!-- Sell Option linking to sell.html -->
+                <a href="sell.html" class="transfer-option-card send-card">
+                    <div class="transfer-option-icon">
+                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </div>
+                    <div class="transfer-option-info">
+                        <h4>Sell</h4>
+                        <p>Move BTC funds to your main PayPal balance or external address</p>
+                    </div>
+                </a>
+
+                <!-- Receive Option linking to receive.html -->
+                <a href="receive.html" class="transfer-option-card">
+                    <div class="transfer-option-icon" style="color: #0070ba; background-color: #e6f2fb;">
+                        <svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+                    </div>
+                    <div class="transfer-option-info">
+                        <h4>Receive</h4>
+                        <p>By sharing your BTC address</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function parseSafeAmount(raw) {
+            const num = parseFloat(raw);
+            return Number.isNaN(num) || num < 0 ? 0 : num;
+        }
+
+        function formatUSD(amount) {
+            return '$' + parseSafeAmount(amount).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function escapeHTML(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function ensureDefaultHistory(cryptoBalNum) {
+            const existing = localStorage.getItem('user_transactions');
+            if (existing === null) {
+                const initialList = [];
+                if (cryptoBalNum > 0) {
+                    initialList.push({
+                        title: 'BTC Balance Added',
+                        meta: 'Initial account balance',
+                        amount: '+' + formatUSD(cryptoBalNum),
+                        type: 'positive'
+                    });
+                }
+                localStorage.setItem('user_transactions', JSON.stringify(initialList));
+            }
+        }
+
+        function syncBalancesAndHistory() {
+            const paypalRaw = (localStorage.getItem('user_paypal_balance') || '').trim();
+            const paypalNum = paypalRaw === '' ? 0 : parseSafeAmount(paypalRaw);
+            localStorage.setItem('user_paypal_balance', paypalNum.toFixed(2));
+
+            const primaryCrypto = (localStorage.getItem('user_crypto_balance_usd') || '').trim();
+            const fallbackCrypto = (localStorage.getItem('user_account_balance') || '').trim();
+            const cryptoRaw = primaryCrypto || fallbackCrypto || '0.00';
+            const cryptoNum = parseSafeAmount(cryptoRaw);
+            localStorage.setItem('user_crypto_balance_usd', cryptoNum.toFixed(2));
+            localStorage.setItem('user_account_balance', cryptoNum.toFixed(2));
+
+            ensureDefaultHistory(cryptoNum);
+
+            const formattedPaypal = formatUSD(paypalNum);
+            const formattedCrypto = formatUSD(cryptoNum);
+
+            const fullName = localStorage.getItem('user_full_name') || 'PayPal User';
+            const email = localStorage.getItem('user_email') || 'paypal.user@example.com';
+            const phone = localStorage.getItem('user_phone') || '+1 (555) 010-2026';
+
+            document.getElementById('paypalBalanceDisplay').textContent = formattedPaypal;
+            document.getElementById('cryptoBalanceDisplay').textContent = formattedCrypto;
+            document.getElementById('displayAccountEmail').textContent = email;
+            document.getElementById('paypalOwnerSubtext').textContent = email;
+
+            document.getElementById('accDetailFullName').textContent = fullName;
+            document.getElementById('accDetailEmail').textContent = email;
+            document.getElementById('accDetailPhone').textContent = phone;
+            document.getElementById('accDetailPaypalBal').textContent = formattedPaypal;
+            document.getElementById('accDetailCryptoBal').textContent = formattedCrypto;
+
+            let txList = [];
+            try {
+                const parsedTx = JSON.parse(localStorage.getItem('user_transactions') || '[]');
+                if (Array.isArray(parsedTx)) {
+                    txList = parsedTx;
+                }
+            } catch (err) {
+                txList = [];
+            }
+
+            document.getElementById('activityCountDisplay').textContent = String(txList.length);
+
+            const container = document.getElementById('transactionHistoryList');
+            if (!txList.length) {
+                container.innerHTML = '<p style="font-size: 13px; color: #6c737a;">No transactions yet.</p>';
+            } else {
+                container.innerHTML = txList.map(item => `
+                    <div class="tx-item">
+                        <div>
+                            <div class="tx-title">${escapeHTML(item.title || 'Transaction')}</div>
+                            <div class="tx-meta">${escapeHTML(item.meta || '')}</div>
+                        </div>
+                        <div class="tx-amount ${item.type === 'negative' ? 'negative' : 'positive'}">${escapeHTML(item.amount || '$0.00')}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderAuthState() {
+            const isLoggedIn = localStorage.getItem('user_is_logged_in') === 'true';
+            const authScreen = document.getElementById('authScreen');
+            const dashboardView = document.getElementById('dashboardView');
+            const bottomNav = document.getElementById('bottomNav');
+
+            if (isLoggedIn) {
+                authScreen.classList.remove('active');
+                dashboardView.classList.add('active');
+                bottomNav.classList.add('active');
+                syncBalancesAndHistory();
+            } else {
+                dashboardView.classList.remove('active');
+                bottomNav.classList.remove('active');
+                authScreen.classList.add('active');
+
+                const savedEmail = localStorage.getItem('user_email');
+                if (savedEmail && !document.getElementById('loginEmail').value) {
+                    document.getElementById('loginEmail').value = savedEmail;
+                }
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const enteredEmail = document.getElementById('loginEmail').value.trim();
+            const enteredPassword = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('authErrorMsg');
+
+            const savedEmail = (localStorage.getItem('user_email') || '').trim();
+            const savedPassword = localStorage.getItem('user_password') || '';
+
+            if (!savedEmail || !savedPassword) {
+                errorEl.style.color = '#c62828';
+                errorEl.textContent = 'No registered account found. Please sign up first.';
+                return;
+            }
+
+            const emailMatches = enteredEmail.toLowerCase() === savedEmail.toLowerCase();
+            const passwordMatches = enteredPassword === savedPassword;
+
+            if (!emailMatches || !passwordMatches) {
+                errorEl.style.color = '#c62828';
+                errorEl.textContent = 'Email or password does not match your account.';
+                return;
+            }
+
+            errorEl.textContent = '';
+            localStorage.setItem('user_is_logged_in', 'true');
+            renderAuthState();
+        });
+
+        function showSavedAccountHint() {
+            const savedEmail = localStorage.getItem('user_email');
+            const errorEl = document.getElementById('authErrorMsg');
+            if (savedEmail) {
+                errorEl.style.color = '#0070ba';
+                errorEl.textContent = 'Saved email: ' + savedEmail;
+            } else {
+                errorEl.style.color = '#c62828';
+                errorEl.textContent = 'No saved account found on this device.';
+            }
+        }
+
+        function toggleResetPanel() {
+            const panel = document.getElementById('resetPasswordPanel');
+            panel.classList.toggle('active');
+            const savedEmail = localStorage.getItem('user_email') || '';
+            const verifyInput = document.getElementById('resetVerifyEmail');
+            if (savedEmail && !verifyInput.value) {
+                verifyInput.value = savedEmail;
+            }
+        }
+
+        function handlePasswordReset() {
+            const savedEmail = (localStorage.getItem('user_email') || '').trim();
+            const verifyEmail = document.getElementById('resetVerifyEmail').value.trim();
+            const newPassword = document.getElementById('resetNewPassword').value;
+            const errorEl = document.getElementById('authErrorMsg');
+
+            if (!savedEmail) {
+                errorEl.style.color = '#c62828';
+                errorEl.textContent = 'No registered account found on this device.';
+                return;
+            }
+
+            if (!verifyEmail || verifyEmail.toLowerCase() !== savedEmail.toLowerCase()) {
+                errorEl.style.color = '#c62828';
+                errorEl.textContent = 'Email does not match the registered account.';
+                return;
+            }
+
+            if (!newPassword) {
+                errorEl.style.color = '#c62828';
+                errorEl.textContent = 'Please enter a new password.';
+                return;
+            }
+
+            localStorage.setItem('user_password', newPassword);
+            document.getElementById('loginEmail').value = savedEmail;
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('resetNewPassword').value = '';
+            document.getElementById('resetPasswordPanel').classList.remove('active');
+
+            errorEl.style.color = '#0a7d38';
+            errorEl.textContent = 'Password updated. You can now log in with your new password.';
+        }
+
+        function switchTab(tabName) {
+            const tabs = ['home', 'accounts', 'activity', 'offers'];
+            tabs.forEach(t => {
+                document.getElementById('panel-' + t).classList.toggle('active', t === tabName);
+                const navBtn = document.getElementById('nav-' + t);
+                if (navBtn) {
+                    navBtn.classList.toggle('active', t === tabName);
+                }
+            });
+        }
+
+        function saveBalanceAndOpenModal() {
+            const currentCrypto = parseSafeAmount(localStorage.getItem('user_crypto_balance_usd') || '0.00').toFixed(2);
+            localStorage.setItem('user_crypto_balance_usd', currentCrypto);
+            document.getElementById('transferModalOverlay').classList.add('active');
+        }
+
+        function closeTransferModal() {
+            document.getElementById('transferModalOverlay').classList.remove('active');
+        }
+
+        function closeTransferModalOnOutside(event) {
+            if (event.target === document.getElementById('transferModalOverlay')) {
+                closeTransferModal();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user_is_logged_in');
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('authErrorMsg').textContent = '';
+            renderAuthState();
+        }
+
+        // Initialize on load
+        renderAuthState();
+    </script>
+
+</body>
+</html>
